@@ -237,7 +237,7 @@ A 45–60 second demonstration will be provided, showing:
 
 ## Application Preview
 
-**Expo Preview:** [Add Expo preview link or QR code]
+**Expo Preview:** (https://expo.dev/@thayaparangopan/koin-expense-app)
 
 **GitHub Repository:** https://github.com/thayaparangopan/koin-expense-app
 
