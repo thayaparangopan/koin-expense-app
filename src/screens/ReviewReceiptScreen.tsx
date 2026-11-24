@@ -9,6 +9,8 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -42,6 +44,7 @@ export const ReviewReceiptScreen: React.FC<ReviewReceiptScreenProps> = ({
   );
   const [items, setItems] = useState<ReceiptItem[]>(initialData.items || []);
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
   // Dynamic integer-based total
   const totalCents = calculateTotalCents(items);
@@ -135,10 +138,23 @@ export const ReviewReceiptScreen: React.FC<ReviewReceiptScreenProps> = ({
 
           <Text style={styles.navTitle}>Review Receipt</Text>
 
-          {/* Receipt badge icon */}
-          <View style={styles.receiptBadge}>
-            <Ionicons name="receipt" size={22} color="#1E293B" />
-          </View>
+          {/* Receipt badge / thumbnail icon */}
+          <TouchableOpacity
+            style={styles.receiptBadge}
+            onPress={() => initialData.imageUri && setIsImageModalVisible(true)}
+            activeOpacity={0.8}
+            disabled={!initialData.imageUri}
+          >
+            {initialData.imageUri ? (
+              <Image
+                source={{ uri: initialData.imageUri }}
+                style={styles.receiptThumbImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <Ionicons name="receipt" size={22} color="#1E293B" />
+            )}
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -221,6 +237,31 @@ export const ReviewReceiptScreen: React.FC<ReviewReceiptScreenProps> = ({
               </View>
             </View>
           </View>
+
+          {/* Uploaded Receipt Photo Attached Card (if photo exists) */}
+          {initialData.imageUri && (
+            <TouchableOpacity
+              style={styles.receiptPhotoCard}
+              onPress={() => setIsImageModalVisible(true)}
+              activeOpacity={0.8}
+            >
+              <Image
+                source={{ uri: initialData.imageUri }}
+                style={styles.receiptCardThumb}
+                resizeMode="cover"
+              />
+              <View style={styles.receiptCardInfo}>
+                <Text style={styles.receiptCardTitle}>Uploaded Receipt Photo</Text>
+                <Text style={styles.receiptCardSubtitle}>
+                  Tap to view and inspect full photo
+                </Text>
+              </View>
+              <View style={styles.expandPill}>
+                <Ionicons name="eye-outline" size={15} color={theme.colors.primary} />
+                <Text style={styles.expandPillText}>Inspect</Text>
+              </View>
+            </TouchableOpacity>
+          )}
 
           {/* Extracted Items Section */}
           <View style={styles.itemsSectionHeader}>
@@ -311,6 +352,43 @@ export const ReviewReceiptScreen: React.FC<ReviewReceiptScreenProps> = ({
           onSelect={setCategory}
           onClose={() => setIsCategoryModalVisible(false)}
         />
+
+        {/* Fullscreen Receipt Image Inspection Modal */}
+        {initialData.imageUri && (
+          <Modal
+            visible={isImageModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setIsImageModalVisible(false)}
+          >
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Receipt Photo</Text>
+                  <TouchableOpacity
+                    onPress={() => setIsImageModalVisible(false)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons name="close-circle" size={28} color={theme.colors.textWhite} />
+                  </TouchableOpacity>
+                </View>
+
+                <Image
+                  source={{ uri: initialData.imageUri }}
+                  style={styles.modalImage}
+                  resizeMode="contain"
+                />
+
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setIsImageModalVisible(false)}
+                >
+                  <Text style={styles.modalCloseText}>Done Viewing</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -345,12 +423,17 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   receiptBadge: {
-    width: 36,
-    height: 44,
+    width: 38,
+    height: 46,
     borderRadius: 8,
     backgroundColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  receiptThumbImage: {
+    width: '100%',
+    height: '100%',
   },
   scroll: {
     flex: 1,
@@ -365,7 +448,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 18,
     ...theme.shadows.card,
-    marginBottom: 24,
+    marginBottom: 14,
   },
   merchantHeaderRow: {
     flexDirection: 'row',
@@ -437,6 +520,50 @@ const styles = StyleSheet.create({
   },
   chevronIcon: {
     marginLeft: 4,
+  },
+  receiptPhotoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.card,
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#EAE6DF',
+  },
+  receiptCardThumb: {
+    width: 44,
+    height: 52,
+    borderRadius: 8,
+    backgroundColor: '#F1ECE5',
+    marginRight: 12,
+  },
+  receiptCardInfo: {
+    flex: 1,
+  },
+  receiptCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+    marginBottom: 2,
+  },
+  receiptCardSubtitle: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+  },
+  expandPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.primaryLight,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    gap: 4,
+  },
+  expandPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.colors.primary,
   },
   itemsSectionHeader: {
     flexDirection: 'row',
@@ -537,6 +664,45 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.textWhite,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(11, 19, 43, 0.92)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingVertical: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.textWhite,
+  },
+  modalImage: {
+    flex: 1,
+    width: '100%',
+    borderRadius: 12,
+  },
+  modalCloseButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  modalCloseText: {
+    fontSize: 15,
     fontWeight: '700',
     color: theme.colors.textWhite,
   },

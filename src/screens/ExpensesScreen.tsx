@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,10 +30,10 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
   const [isScanning, setIsScanning] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<TabKey>('Expenses');
 
-  const processImageUri = async (uri?: string) => {
+  const processImageUri = async (uri?: string, base64?: string) => {
     try {
       setIsScanning(true);
-      const extracted = await extractReceiptData(uri);
+      const extracted = await extractReceiptData(uri, base64);
       setIsScanning(false);
       onStartReview(extracted);
     } catch (error) {
@@ -43,54 +44,70 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
 
   const handleCamera = async () => {
     try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        // Still allow demo flow using mock receipt
-        Alert.alert(
-          'Camera Permission',
-          'Camera permission was not granted. Continuing with sample receipt simulation for preview.',
-          [{ text: 'Continue', onPress: () => processImageUri() }]
-        );
-        return;
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Camera Permission Required',
+            'Camera access is needed to capture receipts directly. You can pick an existing receipt from your gallery instead.',
+            [
+              { text: 'Open Gallery', onPress: handleGallery },
+              { text: 'Sample Receipt', onPress: () => processImageUri() },
+            ]
+          );
+          return;
+        }
       }
 
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
+        allowsEditing: Platform.OS !== 'web',
         quality: 0.8,
+        base64: true,
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        await processImageUri(result.assets[0].uri);
+        await processImageUri(
+          result.assets[0].uri,
+          result.assets[0].base64 || undefined
+        );
       }
     } catch (err) {
-      // Graceful fallback for web/desktop or simulator
-      await processImageUri();
+      console.warn('Camera launch fallback:', err);
+      // On web or desktop where camera is not available, open file gallery
+      handleGallery();
     }
   };
 
   const handleGallery = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Gallery Permission',
-          'Gallery permission was not granted. Continuing with sample receipt simulation for preview.',
-          [{ text: 'Continue', onPress: () => processImageUri() }]
-        );
-        return;
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Photo Permission Required',
+            'Gallery access is needed to upload receipts. Continuing with sample preview.',
+            [{ text: 'Continue', onPress: () => processImageUri() }]
+          );
+          return;
+        }
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
+        allowsEditing: Platform.OS !== 'web',
         quality: 0.8,
+        base64: true,
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        await processImageUri(result.assets[0].uri);
+        await processImageUri(
+          result.assets[0].uri,
+          result.assets[0].base64 || undefined
+        );
       }
     } catch (err) {
+      console.warn('Gallery launch fallback:', err);
       await processImageUri();
     }
   };

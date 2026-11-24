@@ -21,12 +21,17 @@ export const UploadCard: React.FC<UploadCardProps> = ({
   isScanning = false,
 }) => {
   return (
-    <View style={styles.cardContainer}>
+    <TouchableOpacity
+      style={styles.cardContainer}
+      onPress={onPressGallery}
+      activeOpacity={0.9}
+      disabled={isScanning}
+    >
       {isScanning ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingTitle}>Scanning Receipt...</Text>
-          <Text style={styles.loadingSubtitle}>Extracting line items & prices</Text>
+          <Text style={styles.loadingSubtitle}>Extracting store details, items & prices</Text>
         </View>
       ) : (
         <>
@@ -40,7 +45,10 @@ export const UploadCard: React.FC<UploadCardProps> = ({
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={onPressCamera}
+              onPress={(e) => {
+                e.stopPropagation?.();
+                onPressCamera();
+              }}
               activeOpacity={0.7}
             >
               <Ionicons
@@ -54,7 +62,10 @@ export const UploadCard: React.FC<UploadCardProps> = ({
 
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={onPressGallery}
+              onPress={(e) => {
+                e.stopPropagation?.();
+                onPressGallery();
+              }}
               activeOpacity={0.7}
             >
               <Ionicons
@@ -68,7 +79,7 @@ export const UploadCard: React.FC<UploadCardProps> = ({
           </View>
         </>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 
