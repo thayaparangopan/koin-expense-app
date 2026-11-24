@@ -66,7 +66,7 @@ export const ReviewReceiptScreen: React.FC<ReviewReceiptScreenProps> = ({
     const newItem: ReceiptItem = {
       id: `item-${Date.now()}-${items.length + 1}`,
       name: 'New item',
-      priceCents: 500, // default ₹5.00
+      priceCents: 500, // default Rs. 5.00
     };
     setItems((prev) => [...prev, newItem]);
   };
@@ -90,7 +90,7 @@ export const ReviewReceiptScreen: React.FC<ReviewReceiptScreenProps> = ({
     if (hasInvalidItem) {
       Alert.alert(
         'Validation Error',
-        'All items must have a name and a price greater than ₹0.00.'
+        'All items must have a name and a price greater than Rs. 0.00.'
       );
       return;
     }

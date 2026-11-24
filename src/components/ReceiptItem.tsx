@@ -60,7 +60,7 @@ export const ReceiptItemRow: React.FC<ReceiptItemProps> = ({
 
         {/* Price Input Box */}
         <View style={styles.priceBox}>
-          <Text style={styles.currencySymbol}>₹</Text>
+          <Text style={styles.currencySymbol}>Rs.</Text>
           <TextInput
             style={styles.priceInput}
             value={priceString}
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    minWidth: 88,
+    minWidth: 96,
     justifyContent: 'space-between',
     marginRight: 12,
   },

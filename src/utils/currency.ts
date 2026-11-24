@@ -1,16 +1,16 @@
 import { ReceiptItem } from '../types/expense';
 
 /**
- * Formats an integer amount in cents to a human-readable currency string in rupees.
- * Example: 2850 -> "₹28.50"
+ * Formats an integer amount in cents to a human-readable currency string in Sri Lankan Rupees.
+ * Example: 2850 -> "Rs. 28.50"
  */
 export function formatCents(cents: number): string {
   const isNegative = cents < 0;
   const abs = Math.abs(cents);
-  const dollars = Math.floor(abs / 100);
+  const rupees = Math.floor(abs / 100);
   const remainder = abs % 100;
   const paddedRemainder = remainder.toString().padStart(2, '0');
-  return `${isNegative ? '-' : ''}₹${dollars}.${paddedRemainder}`;
+  return `${isNegative ? '-' : ''}Rs. ${rupees}.${paddedRemainder}`;
 }
 
 /**
