@@ -130,17 +130,31 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
           {/* Recent Activity Section */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <Text style={styles.sectionSubtitle}>This week</Text>
+            {expenses.length > 0 && (
+              <Text style={styles.sectionSubtitle}>This week</Text>
+            )}
           </View>
 
           <View style={styles.activityList}>
-            {expenses.map((expense, index) => (
-              <ExpenseItem
-                key={expense.id}
-                expense={expense}
-                isLast={index === expenses.length - 1}
-              />
-            ))}
+            {expenses.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <View style={styles.emptyIconCircle}>
+                  <Ionicons name="receipt-outline" size={26} color={theme.colors.textPlaceholder} />
+                </View>
+                <Text style={styles.emptyTitle}>No expenses yet</Text>
+                <Text style={styles.emptySubtitle}>
+                  Snap or upload a bill above to record your first expense
+                </Text>
+              </View>
+            ) : (
+              expenses.map((expense, index) => (
+                <ExpenseItem
+                  key={expense.id}
+                  expense={expense}
+                  isLast={index === expenses.length - 1}
+                />
+              ))
+            )}
           </View>
         </ScrollView>
 
@@ -224,5 +238,38 @@ const styles = StyleSheet.create({
   },
   activityList: {
     marginTop: 2,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 36,
+    paddingHorizontal: 20,
+    backgroundColor: theme.colors.card,
+    borderRadius: 20,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#F1ECE5',
+  },
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: theme.colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    maxWidth: 240,
+    lineHeight: 18,
   },
 });
