@@ -233,7 +233,7 @@ A 45–60 second demonstration will be provided, showing:
 7. Saving an expense.
 8. The updated Recent Activity list.
 
-**Demo Video:** [Watch Demo Video](https://drive.google.com/file/d/1vC-cdmIz2fsHmFpdTQJdpyuAj4xvJaP3/view?usp=sharing)
+**Demo Video:** (https://drive.google.com/file/d/1vC-cdmIz2fsHmFpdTQJdpyuAj4xvJaP3/view?usp=sharing)
 
 ## Application Preview
 
