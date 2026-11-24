@@ -1,8 +1,8 @@
 import { ReceiptItem } from '../types/expense';
 
 /**
- * Formats an integer amount in cents to a human-readable currency string.
- * Example: 2850 -> "$28.50"
+ * Formats an integer amount in cents to a human-readable currency string in rupees.
+ * Example: 2850 -> "₹28.50"
  */
 export function formatCents(cents: number): string {
   const isNegative = cents < 0;
@@ -10,7 +10,7 @@ export function formatCents(cents: number): string {
   const dollars = Math.floor(abs / 100);
   const remainder = abs % 100;
   const paddedRemainder = remainder.toString().padStart(2, '0');
-  return `${isNegative ? '-' : ''}$${dollars}.${paddedRemainder}`;
+  return `${isNegative ? '-' : ''}₹${dollars}.${paddedRemainder}`;
 }
 
 /**

@@ -60,7 +60,7 @@ export const ReceiptItemRow: React.FC<ReceiptItemProps> = ({
 
         {/* Price Input Box */}
         <View style={styles.priceBox}>
-          <Text style={styles.currencySymbol}>$</Text>
+          <Text style={styles.currencySymbol}>₹</Text>
           <TextInput
             style={styles.priceInput}
             value={priceString}
