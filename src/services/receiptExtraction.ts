@@ -32,8 +32,9 @@ async function callOcrSpaceApi(base64: string): Promise<string | null> {
 
     const cleanBase64 = base64.replace(/^data:image\/[a-z]+;base64,/, '');
 
+    const apiKey = process.env.EXPO_PUBLIC_OCR_API_KEY || 'K88279867988957';
     const formData = new FormData();
-    formData.append('apikey', 'K88279867988957'); // Free OCR.space API key
+    formData.append('apikey', apiKey);
     formData.append('base64Image', `data:image/jpeg;base64,${cleanBase64}`);
     formData.append('language', 'eng');
     formData.append('isOverlayRequired', 'false');
