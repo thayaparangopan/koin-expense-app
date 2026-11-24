@@ -20,6 +20,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you select and review receipts.",
+          "cameraPermission": "The app accesses your camera to let you photograph receipts."
+        }
+      ]
+    ]
   }
 }

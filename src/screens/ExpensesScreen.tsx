@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { theme } from '../constants/theme';
 import { UploadCard } from '../components/UploadCard';
 import { ExpenseItem } from '../components/ExpenseItem';
 import { BottomNavigation, TabKey } from '../components/BottomNavigation';
+import { CameraCaptureModal } from '../components/CameraCaptureModal';
 import { ExpenseRecord, ExtractionResult } from '../types/expense';
 import { extractReceiptData } from '../services/receiptExtraction';
 
@@ -27,8 +28,9 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
   expenses,
   onStartReview,
 }) => {
-  const [isScanning, setIsScanning] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState<TabKey>('Expenses');
+  const [isScanning, setIsScanning] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabKey>('Expenses');
+  const [isWebCameraVisible, setIsWebCameraVisible] = useState(false);
 
   const processImageUri = async (uri?: string, base64?: string) => {
     try {
@@ -43,25 +45,30 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
   };
 
   const handleCamera = async () => {
+    // If on Web, open the live Web Camera capture modal
+    if (Platform.OS === 'web') {
+      setIsWebCameraVisible(true);
+      return;
+    }
+
+    // On native iOS/Android, launch native system camera
     try {
-      if (Platform.OS !== 'web') {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert(
-            'Camera Permission Required',
-            'Camera access is needed to capture receipts directly. You can pick an existing receipt from your gallery instead.',
-            [
-              { text: 'Open Gallery', onPress: handleGallery },
-              { text: 'Sample Receipt', onPress: () => processImageUri() },
-            ]
-          );
-          return;
-        }
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Camera Permission Required',
+          'Camera access is required to take receipt photos. You can select an existing photo from your gallery instead.',
+          [
+            { text: 'Gallery', onPress: handleGallery },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        return;
       }
 
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'],
-        allowsEditing: Platform.OS !== 'web',
+        allowsEditing: true,
         quality: 0.8,
         base64: true,
       });
@@ -73,8 +80,7 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
         );
       }
     } catch (err) {
-      console.warn('Camera launch fallback:', err);
-      // On web or desktop where camera is not available, open file gallery
+      console.warn('Native camera error:', err);
       handleGallery();
     }
   };
@@ -86,8 +92,8 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
         if (status !== 'granted') {
           Alert.alert(
             'Photo Permission Required',
-            'Gallery access is needed to upload receipts. Continuing with sample preview.',
-            [{ text: 'Continue', onPress: () => processImageUri() }]
+            'Permission to access photo gallery was not granted.',
+            [{ text: 'OK' }]
           );
           return;
         }
@@ -107,9 +113,13 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
         );
       }
     } catch (err) {
-      console.warn('Gallery launch fallback:', err);
-      await processImageUri();
+      console.warn('Gallery error:', err);
     }
+  };
+
+  const handleWebCameraCapture = (base64: string, dataUrl: string) => {
+    setIsWebCameraVisible(false);
+    processImageUri(dataUrl, base64);
   };
 
   return (
@@ -180,6 +190,16 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({
           activeTab={activeTab}
           onSelectTab={setActiveTab}
         />
+
+        {/* Web Live Camera Modal */}
+        {Platform.OS === 'web' && (
+          <CameraCaptureModal
+            visible={isWebCameraVisible}
+            onCapture={handleWebCameraCapture}
+            onClose={() => setIsWebCameraVisible(false)}
+            onFallbackToFile={handleGallery}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
